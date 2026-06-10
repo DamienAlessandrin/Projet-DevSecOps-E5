@@ -96,7 +96,7 @@ pipeline {
                 --severity HIGH,CRITICAL ^
                 --format table ^
                 -o trivy-report.txt ^
-                %IMAGE_NAME%
+                %DOCKER_IMAGE%
                 """
             }
         }
