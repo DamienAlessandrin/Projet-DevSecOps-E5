@@ -1,1 +1,137 @@
+pipeline {
+    agent any
 
+    tools {
+        maven 'Maven-3.9'
+    }
+
+    parameters {
+        booleanParam(
+            name: 'RUN_TRIVY',
+            defaultValue: true,
+            description: 'Exécuter le scan Trivy'
+        )
+
+        booleanParam(
+            name: 'RUN_SNYK',
+            defaultValue: true,
+            description: 'Exécuter le scan Snyk'
+        )
+    }
+
+    environment {
+        IMAGE_NAME = "product-api-devsecops"
+        CONTAINER_NAME = "product-api-devsecops"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Maven') {
+            steps {
+                bat 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Tests Maven') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME% .'
+            }
+        }
+
+        stage('Trivy Scan') {
+            when {
+                expression { params.RUN_TRIVY }
+            }
+            steps {
+                bat '''
+                trivy image ^
+                --severity HIGH,CRITICAL ^
+                --format table ^
+                -o trivy-report.txt ^
+                %IMAGE_NAME%
+                '''
+            }
+        }
+
+        stage('Archive Trivy Report') {
+            when {
+                expression { params.RUN_TRIVY }
+            }
+            steps {
+                archiveArtifacts artifacts: 'trivy-report.txt'
+            }
+        }
+
+        stage('Snyk Dependency Scan') {
+            when {
+                expression { params.RUN_SNYK }
+            }
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'snyk-token',
+                        variable: 'SNYK_TOKEN'
+                    )
+                ]) {
+
+                    bat '''
+                    snyk auth %SNYK_TOKEN%
+                    snyk test --file=pom.xml
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Docker') {
+            steps {
+
+                bat '''
+                docker rm -f %CONTAINER_NAME% 2>NUL
+                '''
+
+                bat '''
+                docker run -d ^
+                --name %CONTAINER_NAME% ^
+                -p 8080:8080 ^
+                %IMAGE_NAME%
+                '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                bat '''
+                timeout /t 15
+                curl http://localhost:8080/health
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline DevSecOps terminé avec succès.'
+        }
+
+        failure {
+            echo 'Le pipeline a échoué.'
+        }
+
+        always {
+            cleanWs()
+        }
+    }
+}
