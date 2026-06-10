@@ -33,7 +33,7 @@ public class ProductController {
 
     @GetMapping("/health")
     public String getHealth() {
-        return "L'API est fonctionnel -> status : OK";
+        return "{\"status\":\"OK\"}";
     }
 
 }
