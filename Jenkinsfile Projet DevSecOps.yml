@@ -15,8 +15,8 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "product-api-devsecops"
-        CONTAINER_NAME = "product-api-devsecops"
+        APP_NAME = "product-api-devsecops"
+        DOCKER_IMAGE = "alexis/product-api-devsecops"
         GITHUB_REPO = "https://github.com/DamienAlessandrin/Projet-DevSecOps-E5.git"
         TRIVY_EXE = "C:\\ProgramData\\chocolatey\\bin\\trivy.exe" 
         SNYK_EXE = "C:\\ProgramData\\chocolatey\\bin\\snyk.exe"
@@ -134,8 +134,10 @@ pipeline {
             steps {
 
                 bat """
+                docker stop ${APP_NAME}  echo 'Conteneur non existant'
+                docker rm ${APP_NAME}  echo 'Rien à supprimer'
                 docker run -d ^
-                --name product-api-devsecops ^
+                -- name ${APP_NAME} ^
                 -p 8082:8080 ^
                 ${env.DOCKER_IMAGE}
                 """
