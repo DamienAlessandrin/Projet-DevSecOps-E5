@@ -15,7 +15,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "product-api-devsecops"
+        DOCKER_IMAGE = "product-api-devsecops"
         CONTAINER_NAME = "product-api-devsecops"
         GITHUB_REPO = "https://github.com/DamienAlessandrin/Projet-DevSecOps-E5.git"
         TRIVY_EXE = "C:\\ProgramData\\chocolatey\\bin\\trivy.exe" 
