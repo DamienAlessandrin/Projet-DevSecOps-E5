@@ -25,32 +25,70 @@ pipeline {
     }
 
     stages {
-
-        stage('Checkout') {
+        stage('01 - PRINT PARAMETERS') {
             steps {
-                checkout scm
+                echo "Hello ${params.NAME}"
+                echo "Description: ${params.DESC}"
+                echo "Branch Selected : ${params.BRANCH}"
+                echo "Skip Test: ${params.SKIP_TEST}"
             }
         }
 
-        stage('Build Maven') {
-            steps {
-                bat 'mvn clean package -DskipTests'
+        stage('02 - CHECK TOOLS') { 
+            steps { 
+                bat """         
+                echo ===== MAVEN ===== 
+                mvn -version                           
+                echo ===== DOCKER ===== 
+                docker --version                           
+                echo ===== TRIVY ===== 
+                "%TRIVY_EXE%" --version 
+                echo ===== SNYK ===== 
+                "%SNYK_EXE%" --version
+                """
             }
         }
 
-        stage('Tests Maven') {
+        stage('03 - CHECKOUT GITHUB') {
             steps {
-                bat 'mvn test'
+                echo "Downloading source code..."
+                git branch: "${params.BRANCH}",
+                url: "${GITHUB_REPO}"
             }
         }
 
-        stage('Build Docker Image') {
+        stage('04 - BUILD APPLICATION') {
             steps {
-                bat 'docker build -t %IMAGE_NAME% .'
+                echo "Building Application"
+                bat """
+                echo Compilation en cours...
+                mvn clean package -DskipTests=true
+                """
             }
         }
 
-        stage('Trivy Scan') {
+        stage('05 - RUN TESTS') {
+            when {
+                expression { return params.SKIP_TEST == false }
+            }
+            steps {
+                echo "Running Tests"
+                bat """
+                mvn test
+                """
+            }
+        }
+
+        stage('06 - DOCKER BUILD') {
+            steps {
+                echo "Creating Docker image"
+                bat """
+                docker build -t ${DOCKER_IMAGE}:latest .
+                """
+            }
+        }
+
+        stage('07 - TRIVY SECURITY SCAN') {
             when {
                 expression { params.RUN_TRIVY }
             }
@@ -65,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('Archive Trivy Report') {
+        stage('08 - ARCHIVE TRIVY REPORT') {
             when {
                 expression { params.RUN_TRIVY }
             }
@@ -74,7 +112,7 @@ pipeline {
             }
         }
 
-        stage('Snyk Dependency Scan') {
+        stage('09 - SNYK DEPENDENCY SCAN') {
             when {
                 expression { params.RUN_SNYK }
             }
@@ -94,7 +132,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Docker') {
+        stage('10 - DEPLOY DOCKER') {
             steps {
 
                 bat '''
@@ -104,13 +142,13 @@ pipeline {
                 bat '''
                 docker run -d ^
                 --name %CONTAINER_NAME% ^
-                -p 8080:8080 ^
+                -p 8081:8080 ^
                 %IMAGE_NAME%
                 '''
             }
         }
 
-        stage('Health Check') {
+        stage('11 - HEALTH CHECK') {
             steps {
                 bat '''
                 timeout /t 15
