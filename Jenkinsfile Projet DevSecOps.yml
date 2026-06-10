@@ -137,7 +137,7 @@ pipeline {
                 docker stop ${APP_NAME}  echo 'Conteneur non existant'
                 docker rm ${APP_NAME}  echo 'Rien à supprimer'
                 docker run -d ^
-                -- name ${APP_NAME} ^
+                --name ${APP_NAME} ^
                 -p 8082:8080 ^
                 ${env.DOCKER_IMAGE}
                 """
