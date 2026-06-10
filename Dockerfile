@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN apk add --no-cache openjdk25-jdk
+RUN apk add --no-cache openjdk25-jre
 WORKDIR /app
 
 COPY target/*.jar app.jar
