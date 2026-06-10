@@ -1,8 +1,8 @@
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY target/product-api-devsecops.jar app.jar
 
 EXPOSE 8080
 
