@@ -90,13 +90,13 @@ pipeline {
                 expression { params.RUN_TRIVY }
             }
             steps {
-                bat '''
+                bat """
                 trivy image ^
                 --severity HIGH,CRITICAL ^
                 --format table ^
                 -o trivy-report.txt ^
                 %IMAGE_NAME%
-                '''
+                """
             }
         }
 
@@ -121,10 +121,10 @@ pipeline {
                     )
                 ]) {
 
-                    bat '''
+                    bat """
                     snyk auth %SNYK_TOKEN%
                     snyk test --file=pom.xml
-                    '''
+                    """
                 }
             }
         }
@@ -132,25 +132,25 @@ pipeline {
         stage('10 - DEPLOY DOCKER') {
             steps {
 
-                bat '''
+                bat """
                 docker rm -f %CONTAINER_NAME% 2>NUL
-                '''
+                """
 
-                bat '''
+                bat """
                 docker run -d ^
                 --name %CONTAINER_NAME% ^
                 -p 8081:8080 ^
                 %IMAGE_NAME%
-                '''
+                """
             }
         }
 
         # stage('11 - HEALTH CHECK') {
         #     steps {
-        #         bat '''
+        #         bat """
         #         timeout /t 15
         #         curl http://localhost:8081/health
-        #         '''
+        #         """
         #     }
         # }
     }
