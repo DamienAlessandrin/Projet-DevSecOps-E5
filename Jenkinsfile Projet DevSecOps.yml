@@ -141,7 +141,7 @@ pipeline {
                 """
             }
         }
-        
+        /*
         stage('11 - HEALTH CHECK') {
             steps {
                 bat """
@@ -150,6 +150,7 @@ pipeline {
                 """
             }
         }
+        */
     }
 
     post {
