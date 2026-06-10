@@ -147,7 +147,7 @@ pipeline {
         stage('11 - HEALTH CHECK') {
             steps {
                 bat """
-                timeout /t 15
+                sleep 15
                 curl http://localhost:8081/health
                 """
             }
