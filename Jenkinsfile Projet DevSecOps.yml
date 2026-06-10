@@ -147,8 +147,10 @@ pipeline {
         stage('11 - HEALTH CHECK') {
             steps {
                 bat """
-                sleep 15
-                curl http://localhost:8081/health
+                echo Waiting for server...
+                ping 127.0.0.1 -n 15 > nul
+                echo Testing health endpoint...
+                curl -f http://localhost:8081/health
                 """
             }
         }
