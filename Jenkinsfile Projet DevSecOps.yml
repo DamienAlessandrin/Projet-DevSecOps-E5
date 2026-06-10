@@ -138,7 +138,7 @@ pipeline {
                 docker rm ${APP_NAME}  echo 'Rien à supprimer'
                 docker run -d ^
                 --name ${APP_NAME} ^
-                -p 8082:8080 ^
+                -p 8081:8080 ^
                 ${env.DOCKER_IMAGE}
                 """
             }
@@ -148,7 +148,7 @@ pipeline {
             steps {
                 bat """
                 timeout /t 15
-                curl http://localhost:8082/health
+                curl http://localhost:8081/health
                 """
             }
         }
