@@ -6,22 +6,19 @@ pipeline {
     }
 
     parameters {
-        booleanParam(
-            name: 'RUN_TRIVY',
-            defaultValue: true,
-            description: 'Exécuter le scan Trivy'
-        )
-
-        booleanParam(
-            name: 'RUN_SNYK',
-            defaultValue: true,
-            description: 'Exécuter le scan Snyk'
-        )
+        booleanParam(name: 'RUN_TRIVY', defaultValue: true, description: 'Exécuter le scan Trivy')
+        booleanParam(name: 'RUN_SNYK', defaultValue: true, description: 'Exécuter le scan Snyk')
+        booleanParam(name: 'SKIP_TEST', defaultValue: false, description: 'Skip running Tests ?')
+        text(name: 'DESC', defaultValue: 'Pipeline CI/CD Jenkins GitHub', description: 'Description du Job')
+        choice(name: 'BRANCH', choices: ['main', 'dev', 'test'], description: 'Choose Git branch')
     }
 
     environment {
         IMAGE_NAME = "product-api-devsecops"
         CONTAINER_NAME = "product-api-devsecops"
+        GITHUB_REPO = "https://github.com/DamienAlessandrin/Projet-DevSecOps-E5.git"
+        TRIVY_EXE = "C:\\ProgramData\\chocolatey\\bin\\trivy.exe" 
+        SNYK_EXE = "C:\\ProgramData\\chocolatey\\bin\\snyk.exe"
     }
 
     stages {
