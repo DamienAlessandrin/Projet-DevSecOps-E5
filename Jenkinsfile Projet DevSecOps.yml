@@ -60,7 +60,7 @@ pipeline {
                 echo "Building Application"
                 bat """
                 echo Compilation en cours...
-                mvn clean package -DskipTests=true
+                mvn clean package
                 """
             }
         }
