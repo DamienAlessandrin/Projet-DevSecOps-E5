@@ -94,23 +94,12 @@ pipeline {
                 bat """
                 trivy image ^
                 --severity HIGH,CRITICAL ^
-                --format table ^
-                -o trivy-report.txt ^
-                %DOCKER_IMAGE%
+                ${DOCKER_IMAGE}:latest ^
                 """
             }
         }
 
-        stage('08 - ARCHIVE TRIVY REPORT') {
-            when {
-                expression { params.RUN_TRIVY }
-            }
-            steps {
-                archiveArtifacts artifacts: 'trivy-report.txt'
-            }
-        }
-
-        stage('09 - SNYK DEPENDENCY SCAN') {
+        stage('08 - SNYK DEPENDENCY SCAN') {
             when {
                 expression { params.RUN_SNYK }
             }
@@ -130,7 +119,7 @@ pipeline {
             }
         }
 
-        stage('10 - DEPLOY DOCKER') {
+        stage('09 - DEPLOY DOCKER') {
             steps {
 
                 bat """
@@ -144,7 +133,7 @@ pipeline {
             }
         }
         
-        stage('11 - HEALTH CHECK') {
+        stage('10 - HEALTH CHECK') {
             steps {
                 bat """
                 echo Waiting for server...
