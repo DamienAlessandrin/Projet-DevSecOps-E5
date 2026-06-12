@@ -19,13 +19,6 @@ public class ProductController {
         products.add(new Product(3, "Micro-onde SEB", "Électroménager"));
     }
 
-    // Rout racine pour les tests
-    // TODO: Retirer la route
-    @GetMapping("/")
-    public String getIndex() {
-        return "Page d'acceuil \n Si vous êtes la c'est que le GET de la racine fonctionne.";
-    }
-
     @GetMapping("/products")
     public List<Product> getProducts() {
         return products;
